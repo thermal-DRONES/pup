@@ -23,6 +23,7 @@ _PYTHON_BUILD_STANDALONE_URLs = {
         '3.8': 'https://github.com/indygreg/python-build-standalone/releases/download/20220630/cpython-3.8.13+20220630-x86_64-apple-darwin-pgo-full.tar.zst',
         '3.9': 'https://github.com/indygreg/python-build-standalone/releases/download/20220630/cpython-3.9.13+20220630-x86_64-apple-darwin-pgo-full.tar.zst',
         '3.10': 'https://github.com/indygreg/python-build-standalone/releases/download/20220630/cpython-3.10.5+20220630-x86_64-apple-darwin-pgo-full.tar.zst',
+        '3.11': 'https://github.com/indygreg/python-build-standalone/releases/download/20240415/cpython-3.11.9+20240415-x86_64-apple-darwin-pgo-full.tar.zst'
     },
     'win32': {
         '3.7': 'https://github.com/indygreg/python-build-standalone/releases/download/20200822/cpython-3.7.9-x86_64-pc-windows-msvc-shared-pgo-20200823T0118.tar.zst',

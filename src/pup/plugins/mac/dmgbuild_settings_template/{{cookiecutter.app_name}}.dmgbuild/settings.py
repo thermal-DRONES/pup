@@ -17,6 +17,7 @@ symlinks = {
 default_view = 'icon-view'
 background = 'builtin-arrow'
 
+size = "15000000000"
 text_size = 14
 icon_size = 96
 

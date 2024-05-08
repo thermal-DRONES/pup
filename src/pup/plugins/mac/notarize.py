@@ -13,7 +13,7 @@ import xml.etree.ElementTree as et
 
 _log = logging.getLogger(__name__)
 
-
+_log.setLevel(logging.DEBUG)
 
 class Step:
 
@@ -30,6 +30,7 @@ class Step:
         try:
             user = os.environ['PUP_NOTARIZE_USER']
             password = os.environ['PUP_NOTARIZE_PASSWORD']
+            self._identity = os.environ['PUP_SIGNING_IDENTITY']
         except KeyError as exc:
             _log.error('Cannot notarize: environment variable %s not defined.', str(exc))
         else:
@@ -43,8 +44,10 @@ class Step:
         app_bundle_path = build_dir / f'{app_bundle_name}.app'
 
         app_bundle_zip = self._create_app_bundle_zip(dsp, app_bundle_path)
-        request_uuid = self._request_notarization(ctx, dsp, app_bundle_zip, user, password)
-        self._wait_notarization(dsp, request_uuid, user, password)
+        request_uuid = self._notarize2(ctx, dsp, app_bundle_zip, user, password)
+        
+        #request_uuid = self._request_notarization(ctx, dsp, app_bundle_zip, user, password)
+        #self._wait_notarization(dsp, request_uuid, user, password)
         self._staple_app_bundle(dsp, app_bundle_path)
         self._assess_notarization_result(dsp, app_bundle_path)
         app_bundle_zip.unlink()
@@ -104,14 +107,53 @@ class Step:
             result[k] = v
         return result
 
+    def _notarize2(self, ctx, dsp, app_bundle_zip, user, password):
+
+        _log.info('Submitting notarization request...')
+        cmd = [
+            shutil.which('xcrun'),
+            'notarytool',
+            'submit',
+            app_bundle_zip,
+            '--apple-id',
+            user,
+            '--team-id',
+            self._identity,
+            '--password',
+            password,
+            '--output-format',
+            'plist',
+            '--verbose',
+            '--wait',
+        ]
+        xml_output_lines = []
+        dsp.spawn(
+            cmd,
+            out_callable=xml_output_lines.append,
+            err_callable=lambda line: _log.info('notarytool! %s', line),
+        )
+        xml_payload = '\n'.join(xml_output_lines)
+        _log.debug('xml_payload=%r', xml_payload)
+        response = self._parse_xml_plist(xml_payload)
+        try:
+            request_uuid = response['id']
+        except KeyError as exc:
+            _log.critical('Missing %s key in notarization request output.', str(exc))
+            request_uuid = None
+
+        _log.info('Notarization request submitted: RequestUUID=%r.', request_uuid)
+        return request_uuid
+
 
     def _request_notarization(self, ctx, dsp, app_bundle_zip, user, password):
 
         _log.info('Submitting notarization request...')
         cmd = [
             shutil.which('xcrun'),
-            'altool',
-            '--notarize-app',
+            #'altool',
+            #'--notarize-app',
+            'notarytool',
+            'submit',
             '--primary-bundle-id',
             ctx.application_id,
             '--username',
@@ -146,8 +188,10 @@ class Step:
 
         cmd = [
             shutil.which('xcrun'),
-            'altool',
-            '--notarization-info',
+            'notarytool',
+            'info', 
+            #'altool',
+            #'--notarization-info',
             request_uuid,
             '--username',
             user,

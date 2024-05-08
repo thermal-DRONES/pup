@@ -75,6 +75,8 @@ class Step:
 
         wheel_file = self._create_wheel(ctx.src, build_dir, dsp)
         ctx.src_wheel = wheel_file
+        #print("WHEELFILE:",wheel_file)
+        #wheel_file = "build/pup/poistudio-0.6.1-py3-none-any.whl"
         ctx.src_metadata = pkginfo.Wheel(wheel_file)
 
         for field in self._METADATA_FIELDS:
@@ -102,7 +104,8 @@ class Step:
                 out_callable=lambda line: _log.info('pip out: %s', line),
                 err_callable=lambda line: _log.info('pip err: %s', line),
             )
-            wheel_file = os.listdir()[0]
+         #   print(os.listdir())
+            wheel_file = [i for i in os.listdir() if i.lower()[-4:] ==".whl"][0]
         finally:
             os.chdir(cwd)
 

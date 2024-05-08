@@ -4,6 +4,7 @@ PUP Plugin implementing the 'mac.sign-app-bundle' step.
 
 import logging
 import os
+import sys
 import pathlib
 import shutil
 import tempfile
@@ -49,16 +50,25 @@ class Step:
         build_dir = dsp.directories()['build']
         app_bundle_name = ctx.nice_name
         app_bundle_path = build_dir / f'{app_bundle_name}.app'
-
+        #app_bundle_path / "Contents" / "Resources" / "Python" / "lib" / "python3.11" / "site-packages"
         binaries_dir = (ctx.python_runtime_dir / ctx.python_rel_exe).parent
 
         self._entitlements = ilr.files(sign_resources) / 'entitlements.plist'
         self._codesign = shutil.which('codesign')
 
+        #print(app_bundle_path / "Contents"/"Resources"/"Python"/ ctx.python_rel_site_packages,ctx.src)
+        sitepackages_dir = ctx.python_runtime_dir / ctx.python_rel_site_packages
+        sys.path.insert(1, '.')
+        from pup_extra import sign_extra
+        for k,i in enumerate(sign_extra) :
+            sign_extra[k] = sitepackages_dir / i
+        print("SIGNEXTRA",sign_extra)
+        self._sign_extra(dsp, sign_extra)
+        print("SIGN BINARY")
         self._sign_binaries(dsp, binaries_dir)
         self._sign_libraries(dsp, app_bundle_path)
         self._sign(dsp, app_bundle_path)
-
+        
         self._assess_signing_result(dsp, app_bundle_path)
 
 
@@ -68,6 +78,10 @@ class Step:
             if file_path.is_file() and not file_path.is_symlink():
                 self._sign(dsp, file_path)
 
+    def _sign_extra(self, dsp, sign_extra):
+        for file_path in sign_extra:
+            if file_path.is_file() and not file_path.is_symlink():
+                self._sign(dsp, file_path)
 
     def _sign_libraries(self, dsp, base_path):
 

@@ -105,7 +105,9 @@ class Context:
         """
 
         url_parts = parse.urlsplit(self.src_metadata.home_page)
-        return '.'.join((
+        out =  '.'.join((
             '.'.join(reversed(url_parts.netloc.split('.'))),
             '.'.join(filter(None, url_parts.path.split('/')))
         ))
+        return out+self.src_metadata.name
+        
