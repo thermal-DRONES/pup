@@ -4,7 +4,7 @@ Packaging Context.
 
 import pathlib
 from urllib import parse
-
+import sys
 
 class Context:
 
@@ -23,24 +23,18 @@ class Context:
     ):
 
         self.src = src
-        self.launch_module = launch_module
-        self.launch_pyflags = tuple(pyflag for pyflag in launch_pyflags if pyflag)
-        self.given_nice_name = nice_name
-
         self._icon_path = None
-        self.icon_path = pathlib.Path(icon_path).absolute() if icon_path else None
-
+        self.icon_path = None
         self._license_path = None
-        self.license_path = pathlib.Path(license_path).absolute() if license_path else None
-
+        self.license_path = None
+        self.package_name = ""
+        self.app_id = ""
+        self.apple_user = ""
+        self.team_id = ""
+        self.app_password = ""
+        self.sign_extra = []
         self.src_wheel = None
         self.src_metadata = None
-
-        self.ignore_plugins = ignore_plugins
-        self.pkg_platform = platform
-        self.tgt_platform = platform
-        self.tgt_python_version = python_version
-
         self.relocatable_root = None
 
         self.python_runtime_dir = None
@@ -51,6 +45,48 @@ class Context:
         self.python_rel_tcl_library = None
 
         self.final_artifact = None
+
+        sys.path.insert(1, src)
+        try:
+            import pup_setup
+            print(dir(pup_setup))
+            if pup_setup.icon_path:
+                self.icon_path = pathlib.Path(pup_setup.icon_path).absolute() 
+            if pup_setup.license_path:
+                self.license_path = pathlib.Path(pup_setup.license_path).absolute()
+            if pup_setup.nice_name:
+                self.given_nice_name = pup_setup.nice_name
+            if pup_setup.package_name:
+                self.package_name = pup_setup.package_name     
+            if pup_setup.app_id:
+                self.app_id = pup_setup.app_id
+            if pup_setup.team_id:
+                self.team_id = pup_setup.team_id
+            if pup_setup.apple_user:
+                self.apple_user = pup_setup.apple_user
+            if pup_setup.app_pasword:
+                self.app_password = pup_setup.app_password
+            if pup_setup.sign_extra:
+                self.sign_extra = pup_setup.sign_extra
+        except:
+            pass
+        
+        self.launch_module = launch_module
+        self.launch_pyflags = tuple(pyflag for pyflag in launch_pyflags if pyflag)
+        self.given_nice_name = nice_name
+
+        if icon_path:
+            self.icon_path = pathlib.Path(icon_path).absolute() 
+        if license_path:
+            self.license_path = pathlib.Path(license_path).absolute()
+        
+
+        self.ignore_plugins = ignore_plugins
+        self.pkg_platform = platform
+        self.tgt_platform = platform
+        self.tgt_python_version = python_version
+
+        
 
 
     @property
@@ -103,7 +139,9 @@ class Context:
         - home_page='https://example.com/a/path'
         - bundle_id='com.example.a.path'
         """
-
+        if self.app_id:
+            return self.app_id
+        
         url_parts = parse.urlsplit(self.src_metadata.home_page)
         out =  '.'.join((
             '.'.join(reversed(url_parts.netloc.split('.'))),

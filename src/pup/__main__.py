@@ -64,7 +64,6 @@ def main(log_level):
     logs.start(log_level)
 
 
-
 @main.command()
 @click.option('--ignore-plugin', 'ignore_plugins', multiple=True)
 @click.option('--python-version', default='.'.join(map(str, sys.version_info[:2])))

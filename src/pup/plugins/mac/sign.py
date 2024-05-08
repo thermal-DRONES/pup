@@ -58,12 +58,10 @@ class Step:
 
         #print(app_bundle_path / "Contents"/"Resources"/"Python"/ ctx.python_rel_site_packages,ctx.src)
         sitepackages_dir = ctx.python_runtime_dir / ctx.python_rel_site_packages
-        sys.path.insert(1, '.')
-        from pup_extra import sign_extra
-        for k,i in enumerate(sign_extra) :
-            sign_extra[k] = sitepackages_dir / i
-        print("SIGNEXTRA",sign_extra)
-        self._sign_extra(dsp, sign_extra)
+        for k,i in enumerate(ctx.sign_extra) :
+            ctx.sign_extra[k] = sitepackages_dir / i
+        print("SIGNEXTRA",ctx.sign_extra)
+        self._sign_extra(dsp, ctx.sign_extra)
         print("SIGN BINARY")
         self._sign_binaries(dsp, binaries_dir)
         self._sign_libraries(dsp, app_bundle_path)
