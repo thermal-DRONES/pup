@@ -2,9 +2,13 @@
 Packaging Context.
 """
 
+import logging
 import pathlib
 from urllib import parse
 import sys
+
+
+_log = logging.getLogger(__name__)
 
 class Context:
 
@@ -49,27 +53,26 @@ class Context:
         sys.path.insert(1, src)
         try:
             import pup_setup
-            print(dir(pup_setup))
-            if pup_setup.icon_path:
+            if hasattr(pup_setup,"icon_path"):
                 self.icon_path = pathlib.Path(pup_setup.icon_path).absolute() 
-            if pup_setup.license_path:
+            if hasattr(pup_setup,"license_path"):
                 self.license_path = pathlib.Path(pup_setup.license_path).absolute()
-            if pup_setup.nice_name:
+            if hasattr(pup_setup,"nice_name"):
                 self.given_nice_name = pup_setup.nice_name
-            if pup_setup.package_name:
+            if hasattr(pup_setup,"package_name"):
                 self.package_name = pup_setup.package_name     
-            if pup_setup.app_id:
+            if hasattr(pup_setup,"app_id"):
                 self.app_id = pup_setup.app_id
-            if pup_setup.team_id:
+            if hasattr(pup_setup,"team_id"):
                 self.team_id = pup_setup.team_id
-            if pup_setup.apple_user:
+            if hasattr(pup_setup,"apple_user"):
                 self.apple_user = pup_setup.apple_user
-            if pup_setup.app_pasword:
+            if hasattr(pup_setup,"app_password"):
                 self.app_password = pup_setup.app_password
-            if pup_setup.sign_extra:
+            if hasattr(pup_setup,"sign_extra"):
                 self.sign_extra = pup_setup.sign_extra
         except:
-            pass
+            _log.error("CTX import pup setup error", exc_info=True)
         
         self.launch_module = launch_module
         self.launch_pyflags = tuple(pyflag for pyflag in launch_pyflags if pyflag)

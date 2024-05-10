@@ -46,7 +46,7 @@ def package(
     ignore_plugins=(),
     python_version=None,
     launch_module=None,
-    launch_pyflags=None,
+    launch_pyflags=None ,
     nice_name=None,
     icon_path=None,
     license_path=None,

@@ -42,7 +42,7 @@ class Step:
     def __call__(self, ctx, dsp):
 
         try:
-            self._identity = os.environ['PUP_SIGNING_IDENTITY']
+            self._identity = ctx.team_id
         except KeyError as exc:
             _log.error('Cannot sign: environment variable %s not defined.', str(exc))
             return
@@ -58,6 +58,8 @@ class Step:
 
         #print(app_bundle_path / "Contents"/"Resources"/"Python"/ ctx.python_rel_site_packages,ctx.src)
         sitepackages_dir = ctx.python_runtime_dir / ctx.python_rel_site_packages
+        print("SIGNEXTRA vorher",ctx.sign_extra)
+        
         for k,i in enumerate(ctx.sign_extra) :
             ctx.sign_extra[k] = sitepackages_dir / i
         print("SIGNEXTRA",ctx.sign_extra)
@@ -82,9 +84,10 @@ class Step:
                 self._sign(dsp, file_path)
 
     def _sign_libraries(self, dsp, base_path):
-
+        print("SIGN LIBS",base_path)
         self._sign_framework(dsp, base_path)
         self._sign_shared_libs(dsp, base_path)
+        print("SIGN BUNDLED ZIPS")
         self._sign_bundled_zips(dsp, base_path)
         self._sign_bundled_zips(dsp, base_path, extension='whl')
 
